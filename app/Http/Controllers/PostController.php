@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\Post\CreatePostRequest;
+use App\Http\Requests\Post\UpdatePostRequest;
+use App\Http\Resources\PostResource;
+use App\Models\Post;
+use App\Services\PostService;
+use Illuminate\Http\Request;
+
+class PostController extends Controller
+{
+    protected $postService;
+
+    public function __construct(PostService $postService)
+    {
+        $this->postService = $postService;
+    }
+
+    public function index(Request $request)
+    {
+        $posts = $this->postService->getAllPosts();
+        return PostResource::apiPaginate($posts, $request);
+    }
+
+    public function show($slug)
+    {
+        $post = $this->postService->getPostBySlug($slug);
+        return new PostResource($post);
+    }
+
+    public function store(CreatePostRequest $request)
+    {
+
+        $post = $this->postService->createPost($request->validated());
+        return new PostResource($post);
+    }
+
+    public function update(UpdatePostRequest $request, $id)
+    {
+        $user = auth()->user();
+
+        // Admin can update all posts
+        if ($user->role === 'admin') {
+            $post = Post::findOrFail($id);
+        }
+        // Author only update yourself
+        else {
+            $post = Post::where('id', $id)->where('user_id', $user->id)->firstOrFail();
+        }
+
+        $updatedPost = $this->postService->updatePost($post, $request->validated());
+
+        return new PostResource($updatedPost);
+    }
+
+    public function destroy($id)
+    {
+        $post = Post::where('id', $id)->firstOrFail();
+        $this->postService->deletePost($post);
+        return response()->json(['message' => 'Post deleted successfully']);
+    }
+
+    public function approve($id)
+    {
+        $post = Post::where('id', $id)->firstOrFail();
+        $this->postService->approvePost($post);
+        return response()->json(['message' => 'Post approved  successfully']);
+    }
+}
