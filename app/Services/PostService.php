@@ -92,4 +92,21 @@ class PostService
 
         return $post;
     }
+
+    public function getPostsByAuthor($id)
+    {
+        $post = Post::where('user_id', $id)->where('status', 'published')->firstOrFail();
+        return $post;
+    }
+
+    public function getPostsByTag($id)
+    {
+        $posts = Post::whereHas('tags', function ($query) use ($id) {
+            $query->where('tags.id', $id);
+        })
+            ->where('status', 'published')
+            ->orderBy('created_at', 'desc');
+
+        return $posts;
+    }
 }

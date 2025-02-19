@@ -6,6 +6,8 @@ use App\Http\Requests\Post\CreatePostRequest;
 use App\Http\Requests\Post\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
+use App\Models\Tag;
+use App\Models\User;
 use App\Services\PostService;
 use Illuminate\Http\Request;
 
@@ -67,5 +69,19 @@ class PostController extends Controller
         $post = Post::where('id', $id)->firstOrFail();
         $this->postService->approvePost($post);
         return response()->json(['message' => 'Post approved  successfully']);
+    }
+
+    public function getPostsByAuthor(Request $request, $id)
+    {
+        $posts = $this->postService->getPostsByAuthor($id);
+
+        return PostResource::apiPaginate($posts, $request);
+    }
+
+    public function getPostsByTag(Request $request, $id)
+    {
+        $posts = $this->postService->getPostsByTag($id);
+
+        return PostResource::apiPaginate($posts, $request);
     }
 }

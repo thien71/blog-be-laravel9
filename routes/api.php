@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 // Posts and Auth
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{slug}', [PostController::class, 'show']);
+Route::get('/posts/author/{id}', [PostController::class, 'getPostsByAuthor']);
+Route::get('/posts/tag/{id}', [PostController::class, 'getPostsByTag']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
