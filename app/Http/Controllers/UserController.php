@@ -50,13 +50,4 @@ class UserController extends Controller
         $this->userService->deleteUser($user);
         return response()->json(['message' => 'User deleted successfully']);
     }
-
-    public function updateRole(UpdateRoleRequest $request, $id)
-    {
-        $admin = auth()->user();
-        $user = User::findOrFail($id);
-        $updatedUser = $this->userService->updateRole($user, $request->role, $admin);
-
-        return new UserResource($updatedUser);
-    }
 }

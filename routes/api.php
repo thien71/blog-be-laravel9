@@ -40,6 +40,5 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
-    Route::put('/users/{id}/role', [UserController::class, 'updateRole']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });

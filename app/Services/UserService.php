@@ -44,19 +44,4 @@ class UserService
     {
         return $user->delete();
     }
-
-    public function updateRole($user, $newRole, $admin)
-    {
-        if ($admin->id === $user->id) {
-            return response()->json(['message' => 'You cannot change your own role'], 403);
-        }
-
-        if (!in_array($newRole, ['admin', 'author'])) {
-            return response()->json(['message' => 'Invalid role'], 400);
-        }
-
-        $user->update(['role' => $newRole]);
-
-        return $user;
-    }
 }
