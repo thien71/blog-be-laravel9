@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\CheckCurrentPasswordRequest;
+use App\Http\Requests\User\UpdatePasswordRequest;
 use App\Http\Requests\User\UpdateRoleRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
@@ -39,7 +41,29 @@ class UserController extends Controller
         }
 
         $user = User::findOrFail($id);
-        $updatesUser = $this->userService->updateUser($user, $request->validated());
+        $updatesUser = $this->userService->updateProfile($user, $request->validated());
+
+        return new UserResource($updatesUser);
+    }
+
+    public function checkCurrentPassword(CheckCurrentPasswordRequest $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $checkPassword = $this->userService->checkCurrentPassword($user, $request->validated());
+
+        return $checkPassword;
+    }
+
+
+    public function updatePassword(UpdatePasswordRequest $request, $id)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin' && $user->id != $id) {
+            return response()->json(['message' => 'You are not permission'], 403);
+        }
+
+        $user = User::findOrFail($id);
+        $updatesUser = $this->userService->updatePassword($user, $request->validated());
 
         return new UserResource($updatesUser);
     }

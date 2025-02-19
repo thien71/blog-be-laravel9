@@ -11,6 +11,7 @@ Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{slug}', [PostController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{id}', [PostController::class, 'update']);
 });
@@ -22,6 +23,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 });
 
 Route::post('/login', [AuthController::class, 'login']);
+
 
 // Tags
 Route::get('/tags', [TagController::class, 'index']);
@@ -37,6 +39,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::post('/users/{id}/password/check', [UserController::class, 'checkCurrentPassword']);
+    Route::put('/users/{id}/password/update', [UserController::class, 'updatePassword']);
 });
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);

@@ -18,7 +18,7 @@ class UserService
         return $user;
     }
 
-    public function updateUser($user, $data)
+    public function updateProfile($user, $data)
     {
         if (isset($data['avatar']) && $data['avatar'] instanceof \Illuminate\Http\UploadedFile) {
             if ($user->avatar && file_exists(public_path($user->avatar))) {
@@ -33,8 +33,27 @@ class UserService
         $user->update([
             'name' => $data['name'] ?? $user->name,
             'email' => $data['email'] ?? $user->email,
-            'password' => isset($data['password']) ? Hash::make($data['password']) : $user->password,
+            // 'password' => isset($data['password']) ? Hash::make($data['password']) : $user->password,
             'avatar' => $data['avatar'] ?? $user->avatar,
+        ]);
+
+        return $user;
+    }
+
+    public function checkCurrentPassword($user, $data)
+    {
+        if (!password_verify($data['password'], $user->password)) {
+            return response()->json(['message' => 'The current password is incorrect!'], 400);
+        }
+
+        return response()->json(['message' => 'The current password is correct!'], 200);;
+    }
+
+
+    public function updatePassword($user, $data)
+    {
+        $user->update([
+            'password' => Hash::make($data['new_password']),
         ]);
 
         return $user;
