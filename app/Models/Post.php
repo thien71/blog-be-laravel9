@@ -11,11 +11,16 @@ class Post extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['user_id', 'title', 'summary', 'content', 'slug', 'thumbnail', 'views', 'status'];
+    protected $fillable = ['user_id', 'category_id', 'title', 'summary', 'content', 'slug', 'thumbnail', 'views', 'status'];
 
     public function author()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function tags()

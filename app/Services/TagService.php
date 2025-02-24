@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Models\Tag;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class TagService
 {

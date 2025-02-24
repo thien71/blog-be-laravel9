@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
@@ -8,9 +9,14 @@ use Illuminate\Support\Facades\Route;
 
 // Posts and Auth
 Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts/latest', [PostController::class, 'getLatestPosts']);
+Route::get('/posts/popular', [PostController::class, 'getPopularPosts']);
+Route::get('/posts/random', [PostController::class, 'getRandomPosts']);
+Route::get('/posts/random-by-category', [PostController::class, 'getRandomPostsByCategory']);
 Route::get('/posts/{slug}', [PostController::class, 'show']);
-Route::get('/posts/author/{id}', [PostController::class, 'getPostsByAuthor']);
 Route::get('/posts/tag/{id}', [PostController::class, 'getPostsByTag']);
+Route::get('/posts/author/{id}', [PostController::class, 'getPostsByAuthor']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -25,6 +31,17 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 });
 
 Route::post('/login', [AuthController::class, 'login']);
+
+// Categories
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{id}', [CategoryController::class, 'show']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{id}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+});
+
 
 
 // Tags

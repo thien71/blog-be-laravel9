@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -108,5 +109,48 @@ class PostService
             ->orderBy('created_at', 'desc');
 
         return $posts;
+    }
+
+    public function getLatestPosts($limit)
+    {
+        return Post::where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    public function getPopularPosts($limit)
+    {
+        return Post::where('status', 'published')
+            ->orderBy('views', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    public function getRandomPosts($limit)
+    {
+        return Post::where('status', 'published')
+            ->inRandomOrder()
+            ->take($limit)
+            ->get();
+    }
+
+
+    public function getRandomPostsByCategory($categoryLimit = 3, $postLimit = 2)
+    {
+        $categories = Category::has('posts')
+            ->inRandomOrder()
+            ->take($categoryLimit)
+            ->get();
+
+        $categories->each(function ($category) use ($postLimit) {
+            $category->setRelation('posts', $category->posts()
+                ->where('status', 'published')
+                ->inRandomOrder()
+                ->take($postLimit)
+                ->get());
+        });
+
+        return $categories;
     }
 }

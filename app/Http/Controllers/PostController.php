@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Post\CreatePostRequest;
+use App\Http\Requests\Post\GetPostsRequest;
 use App\Http\Requests\Post\UpdatePostRequest;
+use App\Http\Resources\CategoryResource;
 use App\Http\Resources\PostResource;
+use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
 use App\Models\User;
@@ -83,5 +86,35 @@ class PostController extends Controller
         $posts = $this->postService->getPostsByTag($id);
 
         return PostResource::apiPaginate($posts, $request);
+    }
+
+    public function getLatestPosts(Request $request)
+    {
+        $limit = $request->input('limit', 1);
+        $posts = $this->postService->getLatestPosts($limit);
+        return PostResource::collection($posts);
+    }
+
+    public function getPopularPosts(Request $request)
+    {
+        $limit = $request->input('limit', 3);
+        $posts = $this->postService->getPopularPosts($limit);
+        return PostResource::collection($posts);
+    }
+
+    public function getRandomPosts(Request $request)
+    {
+        $limit = $request->input('limit', 10);
+        $posts = $this->postService->getRandomPosts($limit);
+        return PostResource::collection($posts);
+    }
+
+
+    public function getRandomPostsByCategory(Request $request)
+    {
+        $limitCategory = 3;
+        $limitPost = $request->input('limit', 2);
+        $categories = $this->postService->getRandomPostsByCategory($limitCategory, $limitPost);
+        return response()->json($categories);
     }
 }
