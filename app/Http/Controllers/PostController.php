@@ -104,7 +104,7 @@ class PostController extends Controller
 
     public function getRandomPosts(Request $request)
     {
-        $limit = $request->input('limit', 10);
+        $limit = $request->input('limit', 9);
         $posts = $this->postService->getRandomPosts($limit);
         return PostResource::collection($posts);
     }
@@ -112,8 +112,8 @@ class PostController extends Controller
 
     public function getRandomPostsByCategory(Request $request)
     {
-        $limitCategory = 3;
-        $limitPost = $request->input('limit', 2);
+        $limitCategory = 5;
+        $limitPost = $request->input('limit', 5);
         $categories = $this->postService->getRandomPostsByCategory($limitCategory, $limitPost);
         return response()->json($categories);
     }
