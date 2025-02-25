@@ -8,6 +8,7 @@ class PostResource extends BaseResource
     {
         return [
             'id' => $this->id,
+            'category_id' => $this->category_id,
             'title' => $this->title,
             'summary' => $this->summary,
             'content' => $this->content,
