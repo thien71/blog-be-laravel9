@@ -65,6 +65,10 @@ class AuthService
 
     public function logout($token)
     {
-        $token->delete();
+        if ($token) {
+            $token->delete();
+        } else {
+            throw new \Exception("Token is null");
+        }
     }
 }

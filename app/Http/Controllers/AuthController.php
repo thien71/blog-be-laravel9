@@ -67,7 +67,18 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $this->authService->logout($request->user()->currentAccessToken());
-        return response()->success(200, 'Logged out successfully.', null);
+        if (!$request->user()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $token = $request->user()->currentAccessToken();
+
+        if (!$token) {
+            return response()->json(['error' => 'Token not found'], 400);
+        }
+
+        $this->authService->logout($token);
+
+        return response()->json(['message' => 'Logged out successfully'], 200);
     }
 }
