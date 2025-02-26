@@ -21,6 +21,12 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
+    public function me()
+    {
+        $user = auth()->user();
+        return new UserResource($user);
+    }
+
     public function index(Request $request)
     {
         $users = $this->userService->getAllUsers();
