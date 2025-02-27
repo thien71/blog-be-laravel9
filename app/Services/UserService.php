@@ -20,20 +20,22 @@ class UserService
 
     public function updateProfile($user, $data)
     {
+        $domain = "http://127.0.0.1:8000/";
+
         if (isset($data['avatar']) && $data['avatar'] instanceof \Illuminate\Http\UploadedFile) {
+
             if ($user->avatar && file_exists(public_path($user->avatar))) {
                 unlink(public_path($user->avatar));
             }
 
             $filename = time() . '.' . $data['avatar']->getClientOriginalExtension();
             $data['avatar']->move(public_path('avatars'), $filename);
-            $data['avatar'] = 'avatars/' . $filename;
+            $data['avatar'] = $domain . 'avatars/' . $filename;
         }
 
         $user->update([
             'name' => $data['name'] ?? $user->name,
             'email' => $data['email'] ?? $user->email,
-            // 'password' => isset($data['password']) ? Hash::make($data['password']) : $user->password,
             'avatar' => $data['avatar'] ?? $user->avatar,
         ]);
 
