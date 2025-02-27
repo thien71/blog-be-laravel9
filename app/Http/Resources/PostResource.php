@@ -9,11 +9,15 @@ class PostResource extends BaseResource
         return [
             'id' => $this->id,
             'category_id' => $this->category_id,
+            'author' => $this->author->id,
             'title' => $this->title,
             'summary' => $this->summary,
             'content' => $this->content,
             'slug' => $this->slug,
             'thumbnail' => $this->getThumbnailUrl(),
+            'views' => $this->views,
+            'created_at' => $this->created_at->toDateTimeString(),
+            'updated_at' => $this->updated_at->toDateTimeString(),
             'status' => $this->status,
             'tags' => $this->tags->pluck('name'),
         ];
