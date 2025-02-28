@@ -9,7 +9,8 @@ class UserService
 {
     public function getAllUsers()
     {
-        return User::orderBy('created_at', 'desc');
+        return User::withTrashed()->orderBy('created_at', 'desc');
+        // return User::orderBy('created_at', 'desc');
     }
 
     public function getUserById($id)
@@ -64,5 +65,10 @@ class UserService
     public function deleteUser($user)
     {
         return $user->delete();
+    }
+
+    public function restoreUser($user)
+    {
+        return $user->restore();
     }
 }

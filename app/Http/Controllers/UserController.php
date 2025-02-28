@@ -80,4 +80,11 @@ class UserController extends Controller
         $this->userService->deleteUser($user);
         return response()->json(['message' => 'User deleted successfully']);
     }
+
+    public function restore($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $this->userService->restoreUser($user);
+        return response()->json(['message' => 'User restored successfully']);
+    }
 }

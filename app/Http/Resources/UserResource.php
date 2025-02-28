@@ -13,6 +13,8 @@ class UserResource extends BaseResource
             'avatar' => $this->avatar,
             'role' => $this->role,
             'created_at' => $this->created_at->toDateTimeString(),
+            'updated_at' => $this->updated_at->toDateTimeString(),
+            'is_disabled' => $this->deleted_at !== null,
         ];
     }
 }
