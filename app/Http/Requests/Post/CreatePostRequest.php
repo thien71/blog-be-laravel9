@@ -11,9 +11,9 @@ class CreatePostRequest extends BaseRequest
     {
         return [
             'title' => 'required|string|max:255',
-            'summary' => 'nullable',
+            'category_id' => 'required',
             'content' => 'required',
-            'thumbnail' => 'nullable',
+            'thumbnail' => 'required',
             'tags' => 'array',
             'tags.*' => 'exists:tags,id',
         ];
