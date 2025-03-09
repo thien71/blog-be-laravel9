@@ -21,8 +21,6 @@ class UserService
 
     public function updateProfile($user, $data)
     {
-        $domain = "http://127.0.0.1:8000/";
-
         if (isset($data['avatar']) && $data['avatar'] instanceof \Illuminate\Http\UploadedFile) {
 
             if ($user->avatar && file_exists(public_path($user->avatar))) {
@@ -31,7 +29,7 @@ class UserService
 
             $filename = time() . '.' . $data['avatar']->getClientOriginalExtension();
             $data['avatar']->move(public_path('avatars'), $filename);
-            $data['avatar'] = $domain . 'avatars/' . $filename;
+            $data['avatar'] = 'avatars/' . $filename;
         }
 
         $user->update([

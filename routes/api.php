@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +17,6 @@ Route::get('/posts/random-by-category', [PostController::class, 'getRandomPostsB
 Route::get('/posts/{slug}', [PostController::class, 'show']);
 Route::get('/posts/tag/{id}', [PostController::class, 'getPostsByTag']);
 Route::get('/posts/author/{id}', [PostController::class, 'getPostsByAuthor']);
-
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -42,8 +42,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 });
 
-
-
 // Tags
 Route::get('/tags', [TagController::class, 'index']);
 Route::get('/tags/{id}', [TagController::class, 'show']);
@@ -66,4 +64,9 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
     Route::patch('/users/{id}/restore', [UserController::class, 'restore']);
+});
+
+// Upload image
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/upload-image', [UploadController::class, 'uploadImages']);
 });
