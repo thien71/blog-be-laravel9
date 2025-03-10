@@ -22,6 +22,12 @@ class PostService
         return $post;
     }
 
+    public function getPostById($id)
+    {
+        $post = Post::where('id', $id)->firstOrFail();
+        return $post;
+    }
+
     public function createPost($data)
     {
         if (isset($data['thumbnail']) && $data['thumbnail'] instanceof \Illuminate\Http\UploadedFile) {
@@ -241,5 +247,11 @@ class PostService
         });
 
         return $categories;
+    }
+
+    public function getPendingPosts()
+    {
+        return Post::where('status', 'pending')
+            ->orderBy('created_at', 'desc');
     }
 }

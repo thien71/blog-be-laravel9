@@ -35,6 +35,12 @@ class PostController extends Controller
         return new PostResource($post);
     }
 
+    public function getPostById($id)
+    {
+        $post = $this->postService->getPostById($id);
+        return new PostResource($post);
+    }
+
     public function store(CreatePostRequest $request)
     {
         $post = $this->postService->createPost($request->validated());
@@ -130,5 +136,11 @@ class PostController extends Controller
         $limitPost = $request->input('limit', 5);
         $categories = $this->postService->getRandomPostsByCategory($limitCategory, $limitPost);
         return response()->json($categories);
+    }
+
+    public function getPendingPosts(Request $request)
+    {
+        $posts = $this->postService->getPendingPosts();
+        return PostResource::apiPaginate($posts, $request);
     }
 }
