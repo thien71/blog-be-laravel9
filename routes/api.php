@@ -22,6 +22,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{id}', [PostController::class, 'update']);
+    Route::put('/posts/{id}/draft', [PostController::class, 'updateDraft']);
+    Route::put('/posts/{id}/submit', [PostController::class, 'submitPost']);
+    Route::delete('/posts/{id}/force', [PostController::class, 'forceDeletePost']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {

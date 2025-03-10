@@ -2,9 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-
 class UploadService
 {
     public function uploadImages(array $files): array

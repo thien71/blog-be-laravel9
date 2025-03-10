@@ -10,7 +10,7 @@ class UpdatePostRequest extends BaseRequest
     {
         return [
             'title' => 'nullable',
-            'summary' => 'nullable',
+            'category_id' => 'nullable',
             'content' => 'nullable',
             'thumbnail' => 'nullable',
             'tags' => 'array',

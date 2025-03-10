@@ -8,25 +8,25 @@ class PostResource extends BaseResource
     {
         return [
             'id' => $this->id,
-            'category' => [
+            'category' => $this->category ? [
                 'id' => $this->category->id,
                 'name' => $this->category->name
-            ],
-            'author' => [
+            ] : null,
+            'author' => $this->author ? [
                 'id' => $this->author->id,
                 'name' => $this->author->name,
                 'avatar' => $this->author->avatar
-            ],
+            ] : null,
             'title' => $this->title,
-            'summary' => $this->summary,
-            'content' => $this->content,
-            'slug' => $this->slug,
+            'summary' => $this->summary ?? '',
+            'content' => $this->content ?? '',
+            'slug' => $this->slug ?? '',
             'thumbnail' => $this->getThumbnailUrl(),
-            'views' => $this->views,
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
-            'status' => $this->status,
-            'tags' => $this->tags->pluck('name'),
+            'views' => $this->views ?? 0,
+            'created_at' => $this->created_at ? $this->created_at->toDateTimeString() : null,
+            'updated_at' => $this->updated_at ? $this->updated_at->toDateTimeString() : null,
+            'status' => $this->status ?? 'draft',
+            'tags' => $this->tags ? $this->tags->pluck('name') : [],
         ];
     }
 

@@ -37,27 +37,34 @@ class PostController extends Controller
 
     public function store(CreatePostRequest $request)
     {
-
         $post = $this->postService->createPost($request->validated());
         return new PostResource($post);
     }
 
     public function update(UpdatePostRequest $request, $id)
     {
-        $user = auth()->user();
-
-        // Admin can update all posts
-        if ($user->role === 'admin') {
-            $post = Post::findOrFail($id);
-        }
-        // Author only update yourself
-        else {
-            $post = Post::where('id', $id)->where('user_id', $user->id)->firstOrFail();
-        }
+        $post = $this->postService->findAuthorizedPost($id);
 
         $updatedPost = $this->postService->updatePost($post, $request->validated());
 
         return new PostResource($updatedPost);
+    }
+
+    public function updateDraft(UpdatePostRequest $request, $id)
+    {
+        $post = Post::findOrFail($id);;
+        $updatedDraftPost = $this->postService->updateDraftPost($post, $request->validated());
+
+        return new PostResource($updatedDraftPost);
+    }
+
+    public function submitPost(UpdatePostRequest $request, $id)
+    {
+        $post = $this->postService->findAuthorizedPost($id);
+
+        $submitPost = $this->postService->submitPost($post, $request->validated());
+
+        return new PostResource($submitPost);
     }
 
     public function destroy($id)
@@ -65,6 +72,13 @@ class PostController extends Controller
         $post = Post::where('id', $id)->firstOrFail();
         $this->postService->deletePost($post);
         return response()->json(['message' => 'Post deleted successfully']);
+    }
+
+    public function forceDeletePost($id)
+    {
+        $post = Post::where('id', $id)->firstOrFail();
+        $this->postService->forceDeletePost($post);
+        return response()->json(['message' => 'Post force deleted successfully']);
     }
 
     public function approve($id)
