@@ -189,6 +189,13 @@ class PostService
         return $post;
     }
 
+    public function rejectPost($post)
+    {
+        $post->update(['status' => 'rejected']);
+
+        return $post;
+    }
+
     public function getPostsByAuthor($id)
     {
         $post = Post::where('user_id', $id)->where('status', 'published')->firstOrFail();
@@ -253,5 +260,11 @@ class PostService
     {
         return Post::where('status', 'pending')
             ->orderBy('created_at', 'desc');
+    }
+
+    public function getDraftPosts()
+    {
+        $user = auth()->user();
+        return Post::where('user_id', $user->id)->where('status', 'draft')->orderBy('created_at', 'desc');
     }
 }

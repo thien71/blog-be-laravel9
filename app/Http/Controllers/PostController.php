@@ -94,6 +94,13 @@ class PostController extends Controller
         return response()->json(['message' => 'Post approved  successfully']);
     }
 
+    public function reject($id)
+    {
+        $post = Post::where('id', $id)->firstOrFail();
+        $this->postService->rejectPost($post);
+        return response()->json(['message' => 'Post rejected successfully']);
+    }
+
     public function getPostsByAuthor(Request $request, $id)
     {
         $posts = $this->postService->getPostsByAuthor($id);
@@ -141,6 +148,12 @@ class PostController extends Controller
     public function getPendingPosts(Request $request)
     {
         $posts = $this->postService->getPendingPosts();
+        return PostResource::apiPaginate($posts, $request);
+    }
+
+    public function getDraftPosts(Request $request)
+    {
+        $posts = $this->postService->getDraftPosts();
         return PostResource::apiPaginate($posts, $request);
     }
 }
