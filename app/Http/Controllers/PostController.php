@@ -63,23 +63,6 @@ class PostController extends Controller
         return new PostResource($updatedPost);
     }
 
-    // public function updateDraft(UpdatePostRequest $request, $id)
-    // {
-    //     $post = Post::findOrFail($id);;
-    //     $updatedDraftPost = $this->postService->updateDraftPost($post, $request->validated());
-
-    //     return new PostResource($updatedDraftPost);
-    // }
-
-    // public function submitPost(UpdatePostRequest $request, $id)
-    // {
-    //     $post = $this->postService->findAuthorizedPost($id);
-
-    //     $submitPost = $this->postService->submitPost($post, $request->validated());
-
-    //     return new PostResource($submitPost);
-    // }
-
     public function destroy($id)
     {
         $post = Post::where('id', $id)->firstOrFail();
@@ -143,7 +126,6 @@ class PostController extends Controller
         return PostResource::collection($posts);
     }
 
-
     public function getRandomPostsByCategory(Request $request)
     {
         $limitCategory = 5;
@@ -152,15 +134,21 @@ class PostController extends Controller
         return response()->json($categories);
     }
 
+    public function getDraftPosts(Request $request)
+    {
+        $posts = $this->postService->getDraftPosts();
+        return PostResource::apiPaginate($posts, $request);
+    }
+
     public function getPendingPosts(Request $request)
     {
         $posts = $this->postService->getPendingPosts();
         return PostResource::apiPaginate($posts, $request);
     }
 
-    public function getDraftPosts(Request $request)
+    public function getRejectedPosts(Request $request)
     {
-        $posts = $this->postService->getDraftPosts();
+        $posts = $this->postService->getRejectedPosts();
         return PostResource::apiPaginate($posts, $request);
     }
 }

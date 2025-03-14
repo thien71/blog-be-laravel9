@@ -24,14 +24,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts', [PostController::class, 'store']);
     Route::get('/posts/draft/me', [PostController::class, 'getDraftPosts']);
     Route::get('/posts/id/{id}', [PostController::class, 'getPostById']);
+    Route::get('/admin/posts/pending', [PostController::class, 'getPendingPosts']);
+    Route::get('/admin/posts/reject', [PostController::class, 'getRejectedPosts']);
     Route::put('/posts/{id}', [PostController::class, 'update']);
-    // Route::put('/posts/{id}/submit', [PostController::class, 'submitPost']);
     Route::delete('/posts/{id}/force', [PostController::class, 'forceDeletePost']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/admin/register', [AuthController::class, 'register']);
-    Route::get('/admin/posts/pending', [PostController::class, 'getPendingPosts']);
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
     Route::put('/posts/{id}/approve', [PostController::class, 'approve']);
     Route::put('/posts/{id}/reject', [PostController::class, 'reject']);

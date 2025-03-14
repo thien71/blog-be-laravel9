@@ -266,16 +266,38 @@ class PostService
         return $categories;
     }
 
-    public function getPendingPosts()
-    {
-        return Post::where('status', 'pending')
-            ->orderBy('created_at', 'desc');
-    }
-
     public function getDraftPosts()
     {
         $user = auth()->user();
         return Post::where('user_id', $user->id)->where('status', 'draft')->orderBy('created_at', 'desc');
+    }
+
+    public function getPendingPosts()
+    {
+        if (auth()->user()->role === 'author') {
+            return Post::where('status', 'pending')
+                ->where('user_id', auth()->id())
+                ->orderBy('created_at', 'desc');
+        } elseif (auth()->user()->role === 'admin') {
+            return Post::where('status', 'pending')
+                ->orderBy('created_at', 'desc');
+        }
+
+        return collect();
+    }
+
+    public function getRejectedPosts()
+    {
+        if (auth()->user()->role === 'author') {
+            return Post::where('status', 'rejected')
+                ->where('user_id', auth()->id())
+                ->orderBy('created_at', 'desc');
+        } elseif (auth()->user()->role === 'admin') {
+            return Post::where('status', 'rejected')
+                ->orderBy('created_at', 'desc');
+        }
+
+        return collect();
     }
 
     public function findAuthorizedPost($id)
