@@ -30,6 +30,32 @@ class PostService
 
     public function createPost($data)
     {
+        if (isset($data['thumbnail'])) {
+            $filename = time() . '.' . $data['thumbnail']->getClientOriginalExtension();
+            $data['thumbnail']->move(public_path('thumbnails'), $filename);
+            $data['thumbnail'] = 'thumbnails/' . $filename;
+        }
+
+        $post = Post::create([
+            'user_id' => auth()->id(),
+            'title' => $data['title'],
+            'content' => $data['content'],
+            'category_id' => $data['category_id'],
+            'slug' => Post::generateUniqueSlug($data['title']),
+            'thumbnail' => $data['thumbnail'] ?? null,
+            'views' => 0,
+            'status' => auth()->user()->role === 'admin' ? 'published' : 'pending',
+        ]);
+
+        if (isset($data['tags'])) {
+            $post->tags()->sync($data['tags']);
+        }
+
+        return $post;
+    }
+
+    public function createDraft($data)
+    {
         if (isset($data['thumbnail']) && $data['thumbnail'] instanceof \Illuminate\Http\UploadedFile) {
             $filename = time() . '.' . $data['thumbnail']->getClientOriginalExtension();
             $data['thumbnail']->move(public_path('thumbnails'), $filename);
@@ -40,37 +66,22 @@ class PostService
         $content = isset($data['content']) ? $data['content'] : '';
         $categoryId = isset($data['category_id']) ? $data['category_id'] : null;
 
-        $isEmpty = $title === '' || $content === '' || $categoryId === null;
-
         $post = Post::create([
-            'user_id'     => auth()->id(),
-            'title'       => $title,
-            'content'     => $content,
+            'user_id' => auth()->id(),
+            'title' => $title,
+            'content' => $content,
             'category_id' => $categoryId,
-            'slug'        => Post::generateUniqueSlug($title) ?? ('default-slug-' . time()),
-            'thumbnail'   => $data['thumbnail'] ?? null,
-            'views'       => 0,
-            'status'      => $isEmpty ? 'draft' : (auth()->user()->role === 'admin' ? 'published' : 'pending'),
+            'slug' => Post::generateUniqueSlug($data['title']),
+            'thumbnail' => $data['thumbnail'] ?? null,
+            'views' => 0,
+            'status' => 'draft',
         ]);
 
-        if (!empty($data['tags']) && is_array($data['tags'])) {
+        if (isset($data['tags'])) {
             $post->tags()->sync($data['tags']);
         }
 
         return $post;
-    }
-
-
-
-    public function findAuthorizedPost($id)
-    {
-        $user = auth()->user();
-
-        if ($user->role === 'admin') {
-            return Post::findOrFail($id);
-        }
-
-        return Post::where('id', $id)->where('user_id', $user->id)->firstOrFail();
     }
 
     public function updatePost($post, $data)
@@ -92,7 +103,6 @@ class PostService
         $post->update([
             'title' => $data['title'] ?? $post->title,
             'category_id' => $data['category_id'] ?? $post->category_id,
-            // 'summary' => $data['summary'] ?? $post->summary,
             'content' => $data['content'] ?? $post->content,
             'slug' => $slug,
             'thumbnail' => $data['thumbnail'] ?? $post->thumbnail,
@@ -106,71 +116,71 @@ class PostService
         return $post;
     }
 
-    public function updateDraftPost($post, $data)
-    {
-        if (isset($data['thumbnail']) && $data['thumbnail'] instanceof \Illuminate\Http\UploadedFile) {
-            if ($post->thumbnail && file_exists(public_path($post->thumbnail))) {
-                unlink(public_path($post->thumbnail));
-            }
+    // public function updateDraftPost($post, $data)
+    // {
+    //     if (isset($data['thumbnail']) && $data['thumbnail'] instanceof \Illuminate\Http\UploadedFile) {
+    //         if ($post->thumbnail && file_exists(public_path($post->thumbnail))) {
+    //             unlink(public_path($post->thumbnail));
+    //         }
 
-            $filename = time() . '.' . $data['thumbnail']->getClientOriginalExtension();
-            $data['thumbnail']->move(public_path('thumbnails'), $filename);
-            $data['thumbnail'] = 'thumbnails/' . $filename;
-        }
+    //         $filename = time() . '.' . $data['thumbnail']->getClientOriginalExtension();
+    //         $data['thumbnail']->move(public_path('thumbnails'), $filename);
+    //         $data['thumbnail'] = 'thumbnails/' . $filename;
+    //     }
 
-        $slug = isset($data['title']) && $data['title'] !== $post->title
-            ? Post::generateUniqueSlug($data['title'], $post->id)
-            : $post->slug;
+    //     $slug = isset($data['title']) && $data['title'] !== $post->title
+    //         ? Post::generateUniqueSlug($data['title'], $post->id)
+    //         : $post->slug;
 
-        $post->update([
-            'title' => $data['title'] ?? $post->title,
-            'category_id' => $data['category_id'] ?? $post->category_id,
-            // 'summary' => $data['summary'] ?? $post->summary,
-            'content' => $data['content'] ?? $post->content,
-            'slug' => $slug,
-            'thumbnail' => $data['thumbnail'] ?? $post->thumbnail,
-            'status' => "draft",
-        ]);
+    //     $post->update([
+    //         'title' => $data['title'] ?? $post->title,
+    //         'category_id' => $data['category_id'] ?? $post->category_id,
+    //         // 'summary' => $data['summary'] ?? $post->summary,
+    //         'content' => $data['content'] ?? $post->content,
+    //         'slug' => $slug,
+    //         'thumbnail' => $data['thumbnail'] ?? $post->thumbnail,
+    //         'status' => "draft",
+    //     ]);
 
-        if (isset($data['tags'])) {
-            $post->tags()->sync($data['tags']);
-        }
+    //     if (isset($data['tags'])) {
+    //         $post->tags()->sync($data['tags']);
+    //     }
 
-        return $post;
-    }
+    //     return $post;
+    // }
 
-    public function submitPost($post, $data)
-    {
-        if (isset($data['thumbnail']) && $data['thumbnail'] instanceof \Illuminate\Http\UploadedFile) {
-            if ($post->thumbnail && file_exists(public_path($post->thumbnail))) {
-                unlink(public_path($post->thumbnail));
-            }
+    // public function submitPost($post, $data)
+    // {
+    //     if (isset($data['thumbnail']) && $data['thumbnail'] instanceof \Illuminate\Http\UploadedFile) {
+    //         if ($post->thumbnail && file_exists(public_path($post->thumbnail))) {
+    //             unlink(public_path($post->thumbnail));
+    //         }
 
-            $filename = time() . '.' . $data['thumbnail']->getClientOriginalExtension();
-            $data['thumbnail']->move(public_path('thumbnails'), $filename);
-            $data['thumbnail'] = 'thumbnails/' . $filename;
-        }
+    //         $filename = time() . '.' . $data['thumbnail']->getClientOriginalExtension();
+    //         $data['thumbnail']->move(public_path('thumbnails'), $filename);
+    //         $data['thumbnail'] = 'thumbnails/' . $filename;
+    //     }
 
-        $slug = isset($data['title']) && $data['title'] !== $post->title
-            ? Post::generateUniqueSlug($data['title'], $post->id)
-            : $post->slug;
+    //     $slug = isset($data['title']) && $data['title'] !== $post->title
+    //         ? Post::generateUniqueSlug($data['title'], $post->id)
+    //         : $post->slug;
 
-        $post->update([
-            'title' => $data['title'] ?? $post->title,
-            'category_id' => $data['category_id'] ?? $post->category_id,
-            // 'summary' => $data['summary'] ?? $post->summary,
-            'content' => $data['content'] ?? $post->content,
-            'slug' => $slug,
-            'thumbnail' => $data['thumbnail'] ?? $post->thumbnail,
-            'status' => auth()->user()->role === 'admin' ? 'published' : 'pending',
-        ]);
+    //     $post->update([
+    //         'title' => $data['title'] ?? $post->title,
+    //         'category_id' => $data['category_id'] ?? $post->category_id,
+    //         // 'summary' => $data['summary'] ?? $post->summary,
+    //         'content' => $data['content'] ?? $post->content,
+    //         'slug' => $slug,
+    //         'thumbnail' => $data['thumbnail'] ?? $post->thumbnail,
+    //         'status' => auth()->user()->role === 'admin' ? 'published' : 'pending',
+    //     ]);
 
-        if (isset($data['tags'])) {
-            $post->tags()->sync($data['tags']);
-        }
+    //     if (isset($data['tags'])) {
+    //         $post->tags()->sync($data['tags']);
+    //     }
 
-        return $post;
-    }
+    //     return $post;
+    // }
 
     public function deletePost($post)
     {
@@ -266,5 +276,16 @@ class PostService
     {
         $user = auth()->user();
         return Post::where('user_id', $user->id)->where('status', 'draft')->orderBy('created_at', 'desc');
+    }
+
+    public function findAuthorizedPost($id)
+    {
+        $user = auth()->user();
+
+        if ($user->role === 'admin') {
+            return Post::findOrFail($id);
+        }
+
+        return Post::where('id', $id)->where('user_id', $user->id)->firstOrFail();
     }
 }

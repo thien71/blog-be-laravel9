@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Post\CreateDraftPostRequest;
 use App\Http\Requests\Post\CreatePostRequest;
 use App\Http\Requests\Post\GetPostsRequest;
 use App\Http\Requests\Post\UpdatePostRequest;
@@ -47,6 +48,12 @@ class PostController extends Controller
         return new PostResource($post);
     }
 
+    public function createDraft(CreateDraftPostRequest $request)
+    {
+        $post = $this->postService->createDraft($request->validated());
+        return new PostResource($post);
+    }
+
     public function update(UpdatePostRequest $request, $id)
     {
         $post = $this->postService->findAuthorizedPost($id);
@@ -56,22 +63,22 @@ class PostController extends Controller
         return new PostResource($updatedPost);
     }
 
-    public function updateDraft(UpdatePostRequest $request, $id)
-    {
-        $post = Post::findOrFail($id);;
-        $updatedDraftPost = $this->postService->updateDraftPost($post, $request->validated());
+    // public function updateDraft(UpdatePostRequest $request, $id)
+    // {
+    //     $post = Post::findOrFail($id);;
+    //     $updatedDraftPost = $this->postService->updateDraftPost($post, $request->validated());
 
-        return new PostResource($updatedDraftPost);
-    }
+    //     return new PostResource($updatedDraftPost);
+    // }
 
-    public function submitPost(UpdatePostRequest $request, $id)
-    {
-        $post = $this->postService->findAuthorizedPost($id);
+    // public function submitPost(UpdatePostRequest $request, $id)
+    // {
+    //     $post = $this->postService->findAuthorizedPost($id);
 
-        $submitPost = $this->postService->submitPost($post, $request->validated());
+    //     $submitPost = $this->postService->submitPost($post, $request->validated());
 
-        return new PostResource($submitPost);
-    }
+    //     return new PostResource($submitPost);
+    // }
 
     public function destroy($id)
     {

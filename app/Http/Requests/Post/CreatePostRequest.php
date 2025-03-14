@@ -10,11 +10,11 @@ class CreatePostRequest extends BaseRequest
     public function rules()
     {
         return [
-            'title' => 'nullable|string|max:255',
-            'category_id' => 'nullable',
-            'content' => 'nullable',
-            'thumbnail' => 'nullable',
-            'tags' => 'nullable|array',
+            'title' => 'required|string|max:255',
+            'category_id' => 'required',
+            'content' => 'required',
+            'thumbnail' => 'required',
+            'tags' => 'array',
             'tags.*' => 'exists:tags,id',
         ];
     }

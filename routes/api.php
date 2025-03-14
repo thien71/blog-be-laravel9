@@ -20,12 +20,12 @@ Route::get('/posts/author/{id}', [PostController::class, 'getPostsByAuthor']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/posts/draft', [PostController::class, 'createDraft']);
     Route::post('/posts', [PostController::class, 'store']);
     Route::get('/posts/draft/me', [PostController::class, 'getDraftPosts']);
     Route::get('/posts/id/{id}', [PostController::class, 'getPostById']);
     Route::put('/posts/{id}', [PostController::class, 'update']);
-    Route::put('/posts/{id}/draft', [PostController::class, 'updateDraft']);
-    Route::put('/posts/{id}/submit', [PostController::class, 'submitPost']);
+    // Route::put('/posts/{id}/submit', [PostController::class, 'submitPost']);
     Route::delete('/posts/{id}/force', [PostController::class, 'forceDeletePost']);
 });
 

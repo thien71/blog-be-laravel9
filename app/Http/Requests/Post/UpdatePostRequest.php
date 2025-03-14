@@ -15,6 +15,7 @@ class UpdatePostRequest extends BaseRequest
             'thumbnail' => 'nullable',
             'tags' => 'array',
             'tags.*' => 'exists:tags,id',
+            'status' => 'nullable',
         ];
     }
 }

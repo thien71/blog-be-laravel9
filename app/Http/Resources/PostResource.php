@@ -26,7 +26,12 @@ class PostResource extends BaseResource
             'created_at' => $this->created_at ? $this->created_at->toDateTimeString() : null,
             'updated_at' => $this->updated_at ? $this->updated_at->toDateTimeString() : null,
             'status' => $this->status ?? 'draft',
-            'tags' => $this->tags ? $this->tags->pluck('name') : [],
+            'tags' => $this->tags ? $this->tags->map(function ($tag) {
+                return [
+                    'id' => $tag->id,
+                    'name' => $tag->name
+                ];
+            }) : [],
         ];
     }
 
