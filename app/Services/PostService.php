@@ -300,6 +300,45 @@ class PostService
         return collect();
     }
 
+    public function getRelatedPosts($request)
+    {
+        $postId = $request->input('post_id');
+        $categoryId = $request->input('category_id');
+        $tags = $request->input('tags', []);
+        $limit = $request->input('limit', 5);
+
+        $query = Post::where('id', '!=', $postId)
+            ->where('status', 'published');
+
+        // Nếu có category_id, chỉ lấy theo category
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        // Nếu có tags, chỉ lấy theo tags
+        if (!empty($tags)) {
+            $query->whereHas('tags', function ($q) use ($tags) {
+                $q->whereIn('name', $tags);
+            });
+        }
+
+        // Nếu chỉ có post_id mà không có category_id và tags => lấy bài liên quan theo cả 2 tiêu chí
+        if ($postId && !$categoryId && empty($tags)) {
+            // Tìm category_id và tags của bài viết hiện tại
+            $currentPost = Post::with('tags')->find($postId);
+            if ($currentPost) {
+                $query->where(function ($q) use ($currentPost) {
+                    $q->where('category_id', $currentPost->category_id)
+                        ->orWhereHas('tags', function ($q) use ($currentPost) {
+                            $q->whereIn('name', $currentPost->tags->pluck('name'));
+                        });
+                });
+            }
+        }
+
+        return $query->orderBy('created_at', 'desc')->limit($limit);
+    }
+
     public function findAuthorizedPost($id)
     {
         $user = auth()->user();

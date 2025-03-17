@@ -151,4 +151,10 @@ class PostController extends Controller
         $posts = $this->postService->getRejectedPosts();
         return PostResource::apiPaginate($posts, $request);
     }
+
+    public function getRelatedPosts(Request $request)
+    {
+        $posts = $this->postService->getRelatedPosts($request);
+        return PostResource::apiPaginate($posts, $request);
+    }
 }

@@ -14,6 +14,7 @@ Route::get('/posts/latest', [PostController::class, 'getLatestPosts']);
 Route::get('/posts/popular', [PostController::class, 'getPopularPosts']);
 Route::get('/posts/random', [PostController::class, 'getRandomPosts']);
 Route::get('/posts/random-by-category', [PostController::class, 'getRandomPostsByCategory']);
+Route::get('/posts/related', [PostController::class, 'getRelatedPosts']);
 Route::get('/posts/{slug}', [PostController::class, 'show']);
 Route::get('/posts/tag/{id}', [PostController::class, 'getPostsByTag']);
 Route::get('/posts/author/{id}', [PostController::class, 'getPostsByAuthor']);
