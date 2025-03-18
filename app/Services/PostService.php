@@ -28,6 +28,17 @@ class PostService
         return $post;
     }
 
+    public function findAuthorizedPost($id)
+    {
+        $user = auth()->user();
+
+        if ($user->role === 'admin') {
+            return Post::findOrFail($id);
+        }
+
+        return Post::where('id', $id)->where('user_id', $user->id)->firstOrFail();
+    }
+
     public function createPost($data)
     {
         if (isset($data['thumbnail'])) {
@@ -115,72 +126,6 @@ class PostService
 
         return $post;
     }
-
-    // public function updateDraftPost($post, $data)
-    // {
-    //     if (isset($data['thumbnail']) && $data['thumbnail'] instanceof \Illuminate\Http\UploadedFile) {
-    //         if ($post->thumbnail && file_exists(public_path($post->thumbnail))) {
-    //             unlink(public_path($post->thumbnail));
-    //         }
-
-    //         $filename = time() . '.' . $data['thumbnail']->getClientOriginalExtension();
-    //         $data['thumbnail']->move(public_path('thumbnails'), $filename);
-    //         $data['thumbnail'] = 'thumbnails/' . $filename;
-    //     }
-
-    //     $slug = isset($data['title']) && $data['title'] !== $post->title
-    //         ? Post::generateUniqueSlug($data['title'], $post->id)
-    //         : $post->slug;
-
-    //     $post->update([
-    //         'title' => $data['title'] ?? $post->title,
-    //         'category_id' => $data['category_id'] ?? $post->category_id,
-    //         // 'summary' => $data['summary'] ?? $post->summary,
-    //         'content' => $data['content'] ?? $post->content,
-    //         'slug' => $slug,
-    //         'thumbnail' => $data['thumbnail'] ?? $post->thumbnail,
-    //         'status' => "draft",
-    //     ]);
-
-    //     if (isset($data['tags'])) {
-    //         $post->tags()->sync($data['tags']);
-    //     }
-
-    //     return $post;
-    // }
-
-    // public function submitPost($post, $data)
-    // {
-    //     if (isset($data['thumbnail']) && $data['thumbnail'] instanceof \Illuminate\Http\UploadedFile) {
-    //         if ($post->thumbnail && file_exists(public_path($post->thumbnail))) {
-    //             unlink(public_path($post->thumbnail));
-    //         }
-
-    //         $filename = time() . '.' . $data['thumbnail']->getClientOriginalExtension();
-    //         $data['thumbnail']->move(public_path('thumbnails'), $filename);
-    //         $data['thumbnail'] = 'thumbnails/' . $filename;
-    //     }
-
-    //     $slug = isset($data['title']) && $data['title'] !== $post->title
-    //         ? Post::generateUniqueSlug($data['title'], $post->id)
-    //         : $post->slug;
-
-    //     $post->update([
-    //         'title' => $data['title'] ?? $post->title,
-    //         'category_id' => $data['category_id'] ?? $post->category_id,
-    //         // 'summary' => $data['summary'] ?? $post->summary,
-    //         'content' => $data['content'] ?? $post->content,
-    //         'slug' => $slug,
-    //         'thumbnail' => $data['thumbnail'] ?? $post->thumbnail,
-    //         'status' => auth()->user()->role === 'admin' ? 'published' : 'pending',
-    //     ]);
-
-    //     if (isset($data['tags'])) {
-    //         $post->tags()->sync($data['tags']);
-    //     }
-
-    //     return $post;
-    // }
 
     public function deletePost($post)
     {
@@ -300,53 +245,84 @@ class PostService
         return collect();
     }
 
-    public function getRelatedPosts($request)
+    public function getRelatedPosts($request, $postId)
     {
-        $postId = $request->input('post_id');
-        $categoryId = $request->input('category_id');
-        $tags = $request->input('tags', []);
         $limit = $request->input('limit', 5);
+        $currentPost = Post::findOrFail($postId);
 
+        if (!$currentPost) {
+            return response()->json(['message' => 'Bài viết không tồn tại'], 404);
+        }
+
+        // Lấy category và tags từ bài viết gốc
+        $categoryId = $currentPost->category_id;
+        $tags = $currentPost->tags->pluck('name')->toArray();
+
+        // Truy vấn các bài viết liên quan dựa trên category hoặc tags
         $query = Post::where('id', '!=', $postId)
-            ->where('status', 'published');
-
-        // Nếu có category_id, chỉ lấy theo category
-        if ($categoryId) {
-            $query->where('category_id', $categoryId);
-        }
-
-        // Nếu có tags, chỉ lấy theo tags
-        if (!empty($tags)) {
-            $query->whereHas('tags', function ($q) use ($tags) {
-                $q->whereIn('name', $tags);
+            ->where('status', 'published')
+            ->where(function ($q) use ($categoryId, $tags) {
+                $q->where('category_id', $categoryId)
+                    ->orWhereHas('tags', function ($q2) use ($tags) {
+                        $q2->whereIn('name', $tags);
+                    });
             });
+
+        // Lấy danh sách bài viết liên quan
+        $relatedPosts = $query->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+
+        // Nếu số lượng bài viết liên quan chưa đủ, bổ sung thêm bài khác
+        if ($relatedPosts->count() < $limit) {
+            $extraPosts = Post::where('id', '!=', $postId)
+                ->where('status', 'published')
+                ->whereNotIn('id', $relatedPosts->pluck('id')->toArray())
+                ->orderBy('created_at', 'desc')
+                ->limit($limit - $relatedPosts->count())
+                ->get();
+
+            // Nối thêm bài bổ sung vào danh sách bài liên quan
+            $relatedPosts = $relatedPosts->concat($extraPosts);
         }
 
-        // Nếu chỉ có post_id mà không có category_id và tags => lấy bài liên quan theo cả 2 tiêu chí
-        if ($postId && !$categoryId && empty($tags)) {
-            // Tìm category_id và tags của bài viết hiện tại
-            $currentPost = Post::with('tags')->find($postId);
-            if ($currentPost) {
-                $query->where(function ($q) use ($currentPost) {
-                    $q->where('category_id', $currentPost->category_id)
-                        ->orWhereHas('tags', function ($q) use ($currentPost) {
-                            $q->whereIn('name', $currentPost->tags->pluck('name'));
-                        });
-                });
-            }
-        }
-
-        return $query->orderBy('created_at', 'desc')->limit($limit);
+        return $relatedPosts;
     }
 
-    public function findAuthorizedPost($id)
+    public function getRelatedTagPosts($request, $id)
     {
-        $user = auth()->user();
+        $limit = $request->input('limit', 5);
+        $currentPost = Post::with('tags')->find($id);
 
-        if ($user->role === 'admin') {
-            return Post::findOrFail($id);
+        if (!$currentPost) {
+            return response()->json(['message' => 'Bài viết không tồn tại'], 404);
         }
 
-        return Post::where('id', $id)->where('user_id', $user->id)->firstOrFail();
+        $tags = $currentPost->tags->pluck('name')->toArray();
+
+        return Post::where('id', '!=', $id)
+            ->where('status', 'published')
+            ->whereHas('tags', function ($q) use ($tags) {
+                $q->whereIn('name', $tags);
+            })
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function getRelatedCategoryPosts($request, $id)
+    {
+        $limit = $request->input('limit', 5);
+        $currentPost = Post::find($id);
+        if (!$currentPost) {
+            return response()->json(['message' => 'Bài viết không tồn tại'], 404);
+        }
+
+        return Post::where('id', '!=', $id)
+            ->where('status', 'published')
+            ->where('category_id', $currentPost->category_id)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
     }
 }

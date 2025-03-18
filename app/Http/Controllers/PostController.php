@@ -152,9 +152,21 @@ class PostController extends Controller
         return PostResource::apiPaginate($posts, $request);
     }
 
-    public function getRelatedPosts(Request $request)
+    public function getRelatedPosts(Request $request, $id)
     {
-        $posts = $this->postService->getRelatedPosts($request);
-        return PostResource::apiPaginate($posts, $request);
+        $posts = $this->postService->getRelatedPosts($request, $id);
+        return PostResource::collection($posts);
+    }
+
+    public function getRelatedCategoryPosts(Request $request, $id)
+    {
+        $posts = $this->postService->getRelatedCategoryPosts($request, $id);
+        return PostResource::collection($posts);
+    }
+
+    public function getRelatedTagPosts(Request $request, $id)
+    {
+        $posts = $this->postService->getRelatedTagPosts($request, $id);
+        return PostResource::collection($posts);
     }
 }
