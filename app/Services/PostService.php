@@ -193,9 +193,9 @@ class PostService
     }
 
 
-    public function getRandomPostsByCategory($categoryLimit = 3, $postLimit = 2)
+    public function getRandomPostsByCategory($categoryLimit = 5, $postLimit = 5)
     {
-        $categories = Category::has('posts')
+        $categories = Category::has('posts', '>=', $postLimit)
             ->inRandomOrder()
             ->take($categoryLimit)
             ->get();

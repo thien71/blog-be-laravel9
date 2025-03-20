@@ -4,14 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Post\CreateDraftPostRequest;
 use App\Http\Requests\Post\CreatePostRequest;
-use App\Http\Requests\Post\GetPostsRequest;
 use App\Http\Requests\Post\UpdatePostRequest;
-use App\Http\Resources\CategoryResource;
+use App\Http\Resources\Post\PostCategoryResource;
 use App\Http\Resources\PostResource;
-use App\Models\Category;
 use App\Models\Post;
-use App\Models\Tag;
-use App\Models\User;
 use App\Services\PostService;
 use Illuminate\Http\Request;
 
@@ -128,10 +124,9 @@ class PostController extends Controller
 
     public function getRandomPostsByCategory(Request $request)
     {
-        $limitCategory = 5;
-        $limitPost = $request->input('limit', 5);
-        $categories = $this->postService->getRandomPostsByCategory($limitCategory, $limitPost);
-        return response()->json($categories);
+        $limitCategory = $request->input('limit', 5);
+        $categories = $this->postService->getRandomPostsByCategory($limitCategory);
+        return PostCategoryResource::collection($categories);
     }
 
     public function getDraftPosts(Request $request)
