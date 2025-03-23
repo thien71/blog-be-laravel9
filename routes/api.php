@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UploadController;
@@ -79,4 +80,9 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 // Upload image
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/upload-image', [UploadController::class, 'uploadImages']);
+});
+
+// Dashboard
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/dashboard-summary', [DashboardController::class, 'summary']);
 });

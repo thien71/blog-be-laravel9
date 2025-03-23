@@ -40,4 +40,12 @@ class CategoryService
         $category = Category::findOrFail($id);
         return $category->delete();
     }
+
+    public function getPopularCategories($limit = 10)
+    {
+        return Category::withCount('posts')
+            ->orderBy('posts_count', 'desc')
+            ->limit($limit)
+            ->get();
+    }
 }

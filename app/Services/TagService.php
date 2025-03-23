@@ -39,4 +39,12 @@ class TagService
     {
         return $tag->delete();
     }
+
+    public function getPopularTags($limit = 10)
+    {
+        return Tag::withCount('posts')
+            ->orderBy('posts_count', 'desc')
+            ->limit($limit)
+            ->get();
+    }
 }

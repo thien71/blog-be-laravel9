@@ -192,7 +192,6 @@ class PostService
             ->get();
     }
 
-
     public function getRandomPostsByCategory($categoryLimit = 5, $postLimit = 5)
     {
         $categories = Category::has('posts', '>=', $postLimit)
