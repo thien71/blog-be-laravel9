@@ -170,19 +170,32 @@ class PostService
 
     public function getLatestPosts($limit)
     {
-        return Post::where('status', 'published')
+        $user = auth()->user();
+        $query = Post::where('status', 'published')
             ->orderBy('created_at', 'desc')
-            ->take($limit)
-            ->get();
+            ->take($limit);
+
+        if ($user && $user->role !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
+
+        return $query->get();
     }
 
     public function getPopularPosts($limit)
     {
-        return Post::where('status', 'published')
+        $user = auth()->user();
+        $query = Post::where('status', 'published')
             ->orderBy('views', 'desc')
-            ->take($limit)
-            ->get();
+            ->take($limit);
+
+        if ($user && $user->role !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
+
+        return $query->get();
     }
+
 
     public function getRandomPosts($limit)
     {
