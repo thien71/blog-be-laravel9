@@ -47,10 +47,13 @@ class PostService
             $data['thumbnail'] = 'thumbnails/' . $filename;
         }
 
+        $cleanContent = preg_replace("/[\r\n]+/", " ", $data['content']);
+
         $post = Post::create([
             'user_id' => auth()->id(),
             'title' => $data['title'],
             'content' => $data['content'],
+            'summary'     => substr(html_entity_decode(strip_tags($cleanContent)), 0, 300),
             'category_id' => $data['category_id'],
             'slug' => Post::generateUniqueSlug($data['title']),
             'thumbnail' => $data['thumbnail'] ?? null,
@@ -77,10 +80,13 @@ class PostService
         $content = isset($data['content']) ? $data['content'] : '';
         $categoryId = isset($data['category_id']) ? $data['category_id'] : null;
 
+        $cleanContent = preg_replace("/[\r\n]+/", " ", $data['content']);
+
         $post = Post::create([
             'user_id' => auth()->id(),
             'title' => $title,
             'content' => $content,
+            'summary'     => substr(html_entity_decode(strip_tags($cleanContent)), 0, 300),
             'category_id' => $categoryId,
             'slug' => Post::generateUniqueSlug($data['title']),
             'thumbnail' => $data['thumbnail'] ?? null,
@@ -111,10 +117,15 @@ class PostService
             ? Post::generateUniqueSlug($data['title'], $post->id)
             : $post->slug;
 
+        $cleanContent = preg_replace("/[\r\n]+/", " ", $data['content']);
+
         $post->update([
             'title' => $data['title'] ?? $post->title,
             'category_id' => $data['category_id'] ?? $post->category_id,
             'content' => $data['content'] ?? $post->content,
+            // 'summary'     => substr(html_entity_decode(strip_tags($cleanContent)), 0, 400),
+            'summary' => isset($data['content']) ? substr(html_entity_decode(strip_tags($cleanContent)), 0, 400) : $post->summary,
+            // 'summary' => isset($data['content']) ? substr(html_entity_decode(strip_tags($data['content'])), 0, 250) : $post->summary,
             'slug' => $slug,
             'thumbnail' => $data['thumbnail'] ?? $post->thumbnail,
             'status' => $data['status'] ?? $post->status,
