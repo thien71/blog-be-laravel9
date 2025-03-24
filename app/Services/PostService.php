@@ -39,6 +39,20 @@ class PostService
         return Post::where('id', $id)->where('user_id', $user->id)->firstOrFail();
     }
 
+    public function getTwoSentences($text)
+    {
+        $cleanText = html_entity_decode(strip_tags($text));
+        preg_match_all('/([^.!?]+[.!?]+)/', $cleanText, $matches);
+        if (isset($matches[0]) && count($matches[0]) > 1) {
+            // Nếu có đủ 2 câu, ghép 2 câu đầu
+            return trim($matches[0][0] . ' ' . $matches[0][1]);
+        } elseif (isset($matches[0][0])) {
+            // Nếu chỉ có 1 câu thì trả về câu đó
+            return trim($matches[0][0]);
+        }
+        return trim($cleanText);
+    }
+
     public function createPost($data)
     {
         if (isset($data['thumbnail'])) {
@@ -50,15 +64,15 @@ class PostService
         $cleanContent = preg_replace("/[\r\n]+/", " ", $data['content']);
 
         $post = Post::create([
-            'user_id' => auth()->id(),
-            'title' => $data['title'],
-            'content' => $data['content'],
-            'summary'     => substr(html_entity_decode(strip_tags($cleanContent)), 0, 300),
+            'user_id'     => auth()->id(),
+            'title'       => $data['title'],
+            'content'     => $data['content'],
+            'summary'     => $this->getTwoSentences($cleanContent),
             'category_id' => $data['category_id'],
-            'slug' => Post::generateUniqueSlug($data['title']),
-            'thumbnail' => $data['thumbnail'] ?? null,
-            'views' => 0,
-            'status' => auth()->user()->role === 'admin' ? 'published' : 'pending',
+            'slug'        => Post::generateUniqueSlug($data['title']),
+            'thumbnail'   => $data['thumbnail'] ?? null,
+            'views'       => 0,
+            'status'      => auth()->user()->role === 'admin' ? 'published' : 'pending',
         ]);
 
         if (isset($data['tags'])) {
@@ -67,6 +81,7 @@ class PostService
 
         return $post;
     }
+
 
     public function createDraft($data)
     {
@@ -86,7 +101,7 @@ class PostService
             'user_id' => auth()->id(),
             'title' => $title,
             'content' => $content,
-            'summary'     => substr(html_entity_decode(strip_tags($cleanContent)), 0, 300),
+            'summary'     => $this->getTwoSentences($cleanContent),
             'category_id' => $categoryId,
             'slug' => Post::generateUniqueSlug($data['title']),
             'thumbnail' => $data['thumbnail'] ?? null,
@@ -123,9 +138,7 @@ class PostService
             'title' => $data['title'] ?? $post->title,
             'category_id' => $data['category_id'] ?? $post->category_id,
             'content' => $data['content'] ?? $post->content,
-            // 'summary'     => substr(html_entity_decode(strip_tags($cleanContent)), 0, 400),
-            'summary' => isset($data['content']) ? substr(html_entity_decode(strip_tags($cleanContent)), 0, 400) : $post->summary,
-            // 'summary' => isset($data['content']) ? substr(html_entity_decode(strip_tags($data['content'])), 0, 250) : $post->summary,
+            'summary' => isset($data['content']) ? $this->getTwoSentences($cleanContent) : $post->summary,
             'slug' => $slug,
             'thumbnail' => $data['thumbnail'] ?? $post->thumbnail,
             'status' => $data['status'] ?? $post->status,
@@ -164,7 +177,7 @@ class PostService
 
     public function getPostsByAuthor($id)
     {
-        $post = Post::where('user_id', $id)->where('status', 'published')->firstOrFail();
+        $post = Post::where('user_id', $id)->where('status', 'published')->orderBy('created_at', 'desc');
         return $post;
     }
 
