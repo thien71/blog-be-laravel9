@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserController;
@@ -86,3 +87,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard-summary', [DashboardController::class, 'summary']);
 });
+
+// Search
+Route::get('/search', [SearchController::class, 'index']);
