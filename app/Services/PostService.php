@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Post;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class PostService
 {
