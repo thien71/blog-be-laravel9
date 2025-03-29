@@ -8,7 +8,7 @@ class CategoryService
 {
     public function getAllCategories()
     {
-        return Category::orderBy('created_at', 'desc');
+        return Category::orderBy('name', 'asc')->get();
     }
 
     public function getCategoryById($id)

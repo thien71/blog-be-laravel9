@@ -22,10 +22,10 @@ class CategoryController extends Controller
         $this->categoryService = $categoryService;
     }
 
-    public function index(Request $request)
+    public function index()
     {
         $categories = $this->categoryService->getAllCategories();
-        return CategoryResource::apiPaginate($categories, $request);
+        return CategoryResource::collection($categories);
     }
 
     public function show($id)

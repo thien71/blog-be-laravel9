@@ -8,7 +8,7 @@ class TagService
 {
     public function getAllTags()
     {
-        return Tag::orderBy('created_at', 'desc');
+        return Tag::orderBy('name', 'asc')->get();
     }
 
     public function getTagById($id)

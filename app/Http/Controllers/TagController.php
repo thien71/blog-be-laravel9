@@ -18,10 +18,10 @@ class TagController extends Controller
         $this->tagService = $tagService;
     }
 
-    public function index(Request $request)
+    public function index()
     {
         $tags = $this->tagService->getAllTags();
-        return TagResource::apiPaginate($tags, $request);
+        return TagResource::collection($tags);
     }
 
     public function show($id)
