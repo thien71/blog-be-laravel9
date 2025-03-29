@@ -39,8 +39,9 @@ class PostService
 
     public function getTwoSentences($text)
     {
-        $cleanText = html_entity_decode(strip_tags($text));
-        preg_match_all('/([^.!?]+[.!?]+)/', $cleanText, $matches);
+        $cleanText = trim(html_entity_decode(strip_tags($text)));
+        preg_match_all('/([^.!?]+[.!?]+)/u', $cleanText, $matches);
+
         if (isset($matches[0]) && count($matches[0]) > 1) {
             // Nếu có đủ 2 câu, ghép 2 câu đầu
             return trim($matches[0][0] . ' ' . $matches[0][1]);
@@ -48,7 +49,8 @@ class PostService
             // Nếu chỉ có 1 câu thì trả về câu đó
             return trim($matches[0][0]);
         }
-        return trim($cleanText);
+
+        return mb_substr($cleanText, 0, 200);
     }
 
     public function createPost($data)
@@ -59,7 +61,7 @@ class PostService
             $data['thumbnail'] = 'thumbnails/' . $filename;
         }
 
-        $cleanContent = preg_replace("/[\r\n]+/", " ", $data['content']);
+        $cleanContent = trim(preg_replace("/[\r\n]+/", " ", $data['content']));
 
         $post = Post::create([
             'user_id'     => auth()->id(),
@@ -80,7 +82,6 @@ class PostService
         return $post;
     }
 
-
     public function createDraft($data)
     {
         if (isset($data['thumbnail']) && $data['thumbnail'] instanceof \Illuminate\Http\UploadedFile) {
@@ -93,7 +94,7 @@ class PostService
         $content = isset($data['content']) ? $data['content'] : '';
         $categoryId = isset($data['category_id']) ? $data['category_id'] : null;
 
-        $cleanContent = preg_replace("/[\r\n]+/", " ", $data['content']);
+        $cleanContent = trim(preg_replace("/[\r\n]+/", " ", $content));
 
         $post = Post::create([
             'user_id' => auth()->id(),
@@ -130,13 +131,15 @@ class PostService
             ? Post::generateUniqueSlug($data['title'], $post->id)
             : $post->slug;
 
-        $cleanContent = preg_replace("/[\r\n]+/", " ", $data['content']);
+        $cleanContent = isset($data['content'])
+            ? trim(preg_replace("/[\r\n]+/", " ", $data['content']))
+            : null;
 
         $post->update([
             'title' => $data['title'] ?? $post->title,
             'category_id' => $data['category_id'] ?? $post->category_id,
             'content' => $data['content'] ?? $post->content,
-            'summary' => isset($data['content']) ? $this->getTwoSentences($cleanContent) : $post->summary,
+            'summary'     => isset($cleanContent) ? $this->getTwoSentences($cleanContent) : $post->summary,
             'slug' => $slug,
             'thumbnail' => $data['thumbnail'] ?? $post->thumbnail,
             'status' => $data['status'] ?? $post->status,

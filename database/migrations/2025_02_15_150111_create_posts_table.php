@@ -16,13 +16,14 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            // $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('title');
-            $table->string('summary', 255)->nullable();
+            $table->text('summary')->nullable();
             $table->text('content');
             $table->string('slug')->unique();
             $table->string('thumbnail')->nullable();
             $table->integer('views')->default(0);
-            $table->enum('status', ['draft', 'published', 'hidden'])->default('draft');
+            $table->enum('status', ['draft', 'published', 'pending', 'rejected', 'hidden'])->default('draft');
             $table->softDeletes();
             $table->timestamps();
         });
